@@ -1,0 +1,29 @@
+{
+  "name": "examai",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.18 <23"
+  },
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true }); console.log('Cleaned .next cache');\"",
+    "check:node": "node -e \"const major=Number(process.versions.node.split('.')[0]); if (major>22||major<18) { console.warn('\\n⚠️  Next.js 15 is stable on Node 18/20/22 LTS. Current:', process.version, '\\n'); }\"",
+    "dev": "npm run check:node && npm run clean && next dev",
+    "dev:clean": "npm run clean && next dev",
+    "build": "npm run check:node && next build",
+    "start": "npm run check:node && next start"
+  },
+  "dependencies": {
+    "firebase": "^12.10.0",
+    "next": "15.2.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}
