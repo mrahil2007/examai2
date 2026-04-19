@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts for UPSC, JEE, NEET, SSC and more.",
   keywords: "JEE preparation, NEET study, UPSC AI tutor, SSC exam practice, AI quiz India, job alerts India",
   robots: "index, follow",
+  verification: {
+    google: "YOUR_GOOGLE_VERIFICATION_CODE", // ← Replace with code from Search Console
+  },
   openGraph: {
     title: "ExamAI – AI Tutor for Every Competitive Exam in India",
     description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts for UPSC, JEE, NEET, SSC and more.",
@@ -39,6 +42,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6816753251540275"
           crossOrigin="anonymous"
           strategy="afterInteractive"
+        />
+
+        {/* ✅ Structured Data for Google */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "ExamAI",
+              "url": "https://examai-in.com",
+              "description": "AI tutor for JEE, NEET, UPSC, SSC exams in India",
+              "applicationCategory": "EducationApplication",
+              "operatingSystem": "Web, Android",
+              "inLanguage": "en-IN",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "INR"
+              },
+              "author": {
+                "@type": "Organization",
+                "name": "ExamAI",
+                "url": "https://examai-in.com"
+              }
+            })
+          }}
         />
       </head>
       <body style={{ margin: 0, padding: 0 }}>
