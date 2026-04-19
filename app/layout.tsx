@@ -26,6 +26,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://examai-in.com",
   },
+  icons: {
+    icon: "/exam_ai_icon_512.png",
+    shortcut: "/exam_ai_icon_512.png",
+    apple: "/exam_ai_icon_512.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
