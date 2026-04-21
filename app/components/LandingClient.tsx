@@ -1307,7 +1307,7 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
               <h2>Ready to crack your exam?</h2>
               <p>Download the mobile app or continue instantly in the web app with Ask AI, Mock Tests, News, Jobs and Resume tools.</p>
               <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-                <a className="btn-teal" href={PLAYSTORE_URL} target="_blank" rel="noopener noreferrer" style={{fontSize:16,padding:"16px 32px", textDecoration: "none"}}>Download on Play Store ↗</a>
+                <a className="btn-teal" href="https://go.examai-in.com" target="_blank" rel="noopener noreferrer" style={{fontSize:16,padding:"16px 32px", textDecoration: "none"}}>Download on Play Store ↗</a>
                 <button className="btn-ghost" style={{fontSize:16,padding:"16px 32px"}} onClick={openWebApp}>Open Web App</button>
               </div>
             </div>
