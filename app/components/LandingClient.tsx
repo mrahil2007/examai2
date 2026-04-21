@@ -1214,7 +1214,7 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
               <h1>Don&apos;t Just Study<br/><span>Let AI Build Your Career</span></h1>
               <p>Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts — all in one platform built for serious aspirants.</p>
               <div className="hero-btns">
-                <a className="btn-teal" href={PLAYSTORE_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>Download App ↗</a>
+                <a className="btn-teal" href="https://go.examai-in.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>Download App ↗</a>
                 <button className="btn-ghost" onClick={openWebApp}>Go To Web App</button>
                 {!user && <button className="btn-ghost" onClick={()=>setShowAuth(true)}>Login</button>}
               </div>
