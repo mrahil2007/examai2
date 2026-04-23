@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { UserProvider } from "@/context/UserContext";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "ExamAI – AI Tutor for Every Competitive Exam in India",
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <UserProvider>
           {children}
         </UserProvider>
+        <Analytics />
       </body>
     </html>
   );
