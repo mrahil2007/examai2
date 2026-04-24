@@ -8,15 +8,17 @@ export const metadata: Metadata = {
   description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts for UPSC, JEE, NEET, SSC and more.",
   keywords: "JEE preparation, NEET study, UPSC AI tutor, SSC exam practice, AI quiz India, job alerts India",
   robots: "index, follow",
-  verification: {
-    google: "YOUR_GOOGLE_VERIFICATION_CODE", // ← Replace with code from Search Console
-  },
+  
   openGraph: {
     title: "ExamAI – AI Tutor for Every Competitive Exam in India",
     description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts for UPSC, JEE, NEET, SSC and more.",
     url: "https://examai-in.com",
     type: "website",
-    images: [{ url: "https://examai-in.com/exam_ai_icon_512.png" }],
+    images: [{ url: "https://examai-in.com/exam_ai_icon_512.png",
+      width: 1200,   // ← add
+    height: 630, 
+    alt: "ExamAI - AI Tutor for World's Competitive Exams"
+     }],
   },
   twitter: {
     card: "summary_large_image",
