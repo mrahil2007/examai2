@@ -2,6 +2,26 @@
 import { useState, useEffect, useRef } from "react";
 import { G } from "@/lib/theme";
 
+// ── AdSense global declaration ─────────────────────────────────────────────────
+declare global { interface Window { adsbygoogle: unknown[]; } }
+
+// ── AdBanner component ─────────────────────────────────────────────────────────
+function AdBanner() {
+  useEffect(() => {
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
+  }, []);
+  return (
+    <ins
+      className="adsbygoogle"
+      style={{ display: "block", width: "100%", minHeight: 60 }}
+      data-ad-client="ca-pub-6816753251540275"
+      data-ad-slot="YOUR_AD_SLOT_ID"   // ← Replace with your actual Ad Slot ID from AdSense
+      data-ad-format="horizontal"
+      data-full-width-responsive="true"
+    />
+  );
+}
+
 interface Job {
   _id: string;
   title: string;
@@ -40,11 +60,9 @@ export default function JobsScreen({ exam, API_URL, onAskAI }: Props) {
   const [search, setSearch] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // FIX: Remove trailing slash from API_URL
   const baseURL = API_URL?.replace(/\/$/, "") || "";
 
   const fetchJobs = async (pg = 1, f = filter, q = search) => {
-    // FIX: Guard against missing API_URL or exam
     if (!baseURL) {
       setError("API URL is not configured.");
       setLoading(false);
@@ -60,11 +78,9 @@ export default function JobsScreen({ exam, API_URL, onAskAI }: Props) {
         ...(f === "international" ? { category: "international" } : {}),
         ...(q.trim() ? { search: q.trim() } : {}),
       });
-      
 
-      // FIX: Use baseURL instead of API_URL directly
       const url = `${baseURL}/jobs?${params}`;
-      console.log("[JobsScreen] Fetching:", url); // FIX: debug log
+      console.log("[JobsScreen] Fetching:", url);
 
       const r = await fetch(url);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -74,7 +90,7 @@ export default function JobsScreen({ exam, API_URL, onAskAI }: Props) {
       setTotal(d.total || 0);
       setPage(pg);
     } catch (err) {
-      console.error("[JobsScreen] Fetch error:", err); // FIX: log actual error
+      console.error("[JobsScreen] Fetch error:", err);
       setError("Could not load jobs. Check your connection.");
     }
     setLoading(false);
@@ -83,7 +99,7 @@ export default function JobsScreen({ exam, API_URL, onAskAI }: Props) {
   useEffect(() => {
     fetchJobs(1, filter, search);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, exam, baseURL]); // FIX: added baseURL as dependency
+  }, [filter, exam, baseURL]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -131,6 +147,11 @@ export default function JobsScreen({ exam, API_URL, onAskAI }: Props) {
         </div>
       </div>
 
+      {/* ── AdSense banner below header ── */}
+      <div style={{ flexShrink: 0, background: "#FFFFFF", borderBottom: "1px solid #E0E0E0", padding: "6px 16px" }}>
+        <AdBanner />
+      </div>
+
       {/* List */}
       <div style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
         {loading && jobs.length === 0 && (
@@ -143,7 +164,6 @@ export default function JobsScreen({ exam, API_URL, onAskAI }: Props) {
         {error && (
           <div style={{ background: `${G.error}15`, border: `1px solid ${G.error}40`, borderRadius: 12, padding: "14px 16px", color: G.error, fontSize: "0.84rem", margin: "8px 0", textAlign: "center" }}>
             ⚠️ {error}<br />
-            {/* FIX: Retry works correctly - calls fetchJobs directly */}
             <button onClick={() => fetchJobs(1, filter, search)} style={{ marginTop: 8, background: "transparent", border: `1px solid ${G.error}`, borderRadius: 6, color: G.error, padding: "5px 12px", cursor: "pointer", fontSize: "0.78rem", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Retry</button>
           </div>
         )}
@@ -164,36 +184,44 @@ export default function JobsScreen({ exam, API_URL, onAskAI }: Props) {
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {jobs.map(job => {
+          {jobs.map((job, index) => {
             const catTag = getCategoryTag(job);
             return (
-              <div key={job._id} style={{ background: "#FFFFFF", border: `1px solid ${job.isNew ? G.border : "#E0E0E0"}`, borderRadius: 14, padding: "16px 14px", transition: "all 0.2s", position: "relative", overflow: "hidden", boxShadow: "0 2px 8px #E0E0E0" }}>
-                {job.isNew && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${G.gold},${G.saffron})` }} />}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: "0.9rem", color: G.text, marginBottom: 4, lineHeight: 1.4 }}>{job.title}</div>
-                    <div style={{ fontSize: "0.76rem", color: G.muted, marginBottom: 4 }}>{job.organization}</div>
-                    {job.category === "international" && job.location && <div style={{ fontSize: "0.74rem", color: G.teal, marginBottom: 6 }}>📍 {job.location}</div>}
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
-                      {job.isNew && <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 100, background: "rgba(20,184,166,0.12)", color: G.teal, border: "1px solid rgba(20,184,166,0.25)", fontWeight: 600 }}>NEW</span>}
-                      {catTag && <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 100, background: catTag.bg, color: catTag.color, border: `1px solid ${catTag.border}`, fontWeight: 600 }}>{catTag.label}</span>}
-                      {job.salary && job.salary !== "As per govt norms" && job.salary !== "As per company norms" && <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 100, background: G.surf2, color: G.muted, border: `1px solid #E0E0E0` }}>💰 {job.salary}</span>}
-                      {job.lastDate && job.lastDate !== "See official site" && <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 100, background: G.surf2, color: G.muted, border: `1px solid #E0E0E0` }}>📅 {job.lastDate}</span>}
+              <>
+                <div key={job._id} style={{ background: "#FFFFFF", border: `1px solid ${job.isNew ? G.border : "#E0E0E0"}`, borderRadius: 14, padding: "16px 14px", transition: "all 0.2s", position: "relative", overflow: "hidden", boxShadow: "0 2px 8px #E0E0E0" }}>
+                  {job.isNew && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${G.gold},${G.saffron})` }} />}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: "0.9rem", color: G.text, marginBottom: 4, lineHeight: 1.4 }}>{job.title}</div>
+                      <div style={{ fontSize: "0.76rem", color: G.muted, marginBottom: 4 }}>{job.organization}</div>
+                      {job.category === "international" && job.location && <div style={{ fontSize: "0.74rem", color: G.teal, marginBottom: 6 }}>📍 {job.location}</div>}
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                        {job.isNew && <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 100, background: "rgba(20,184,166,0.12)", color: G.teal, border: "1px solid rgba(20,184,166,0.25)", fontWeight: 600 }}>NEW</span>}
+                        {catTag && <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 100, background: catTag.bg, color: catTag.color, border: `1px solid ${catTag.border}`, fontWeight: 600 }}>{catTag.label}</span>}
+                        {job.salary && job.salary !== "As per govt norms" && job.salary !== "As per company norms" && <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 100, background: G.surf2, color: G.muted, border: `1px solid #E0E0E0` }}>💰 {job.salary}</span>}
+                        {job.lastDate && job.lastDate !== "See official site" && <span style={{ fontSize: "0.65rem", padding: "2px 8px", borderRadius: 100, background: G.surf2, color: G.muted, border: `1px solid #E0E0E0` }}>📅 {job.lastDate}</span>}
+                      </div>
+                      <div style={{ fontSize: "0.72rem", color: G.muted }}>Source: {job.source}</div>
                     </div>
-                    <div style={{ fontSize: "0.72rem", color: G.muted }}>Source: {job.source}</div>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
-                    <button onClick={() => handleAskAI(job)} style={{ background: `linear-gradient(135deg,rgba(77,140,122,0.15),rgba(13,148,136,0.15))`, border: `1px solid ${G.border}`, color: G.goldL, fontSize: "0.72rem", fontWeight: 700, padding: "7px 12px", borderRadius: 8, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>🤖 Ask AI</button>
-                    {/* FIX: safer applyLink handler */}
-                    <button
-                      onClick={() => { if (job.applyLink) window.open(job.applyLink, "_blank", "noopener,noreferrer"); }}
-                      disabled={!job.applyLink}
-                      style={{ background: "transparent", border: `1px solid #E0E0E0`, color: job.applyLink ? G.muted : "#E0E0E0", fontSize: "0.72rem", padding: "7px 12px", borderRadius: 8, cursor: job.applyLink ? "pointer" : "not-allowed", whiteSpace: "nowrap", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                      Apply →
-                    </button>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
+                      <button onClick={() => handleAskAI(job)} style={{ background: `linear-gradient(135deg,rgba(77,140,122,0.15),rgba(13,148,136,0.15))`, border: `1px solid ${G.border}`, color: G.goldL, fontSize: "0.72rem", fontWeight: 700, padding: "7px 12px", borderRadius: 8, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>🤖 Ask AI</button>
+                      <button
+                        onClick={() => { if (job.applyLink) window.open(job.applyLink, "_blank", "noopener,noreferrer"); }}
+                        disabled={!job.applyLink}
+                        style={{ background: "transparent", border: `1px solid #E0E0E0`, color: job.applyLink ? G.muted : "#E0E0E0", fontSize: "0.72rem", padding: "7px 12px", borderRadius: 8, cursor: job.applyLink ? "pointer" : "not-allowed", whiteSpace: "nowrap", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        Apply →
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                {/* ── AdSense banner after every 5th job card ── */}
+                {(index + 1) % 5 === 0 && index + 1 < jobs.length && (
+                  <div key={`ad-${index}`} style={{ borderRadius: 12, overflow: "hidden", background: "#FFFFFF", border: "1px solid #E0E0E0" }}>
+                    <AdBanner />
+                  </div>
+                )}
+              </>
             );
           })}
         </div>

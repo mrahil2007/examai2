@@ -45,12 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
         {/* ✅ Google AdSense */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6816753251540275"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
+       
 
         {/* ✅ Structured Data for Google */}
         <script

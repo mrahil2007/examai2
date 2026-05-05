@@ -2,6 +2,26 @@
 import { useState, useEffect } from "react";
 import { G, EXAMS, STATE_PCS_LIST, TOPIC_PH } from "@/lib/theme";
 
+// ── AdSense global declaration ─────────────────────────────────────────────────
+declare global { interface Window { adsbygoogle: unknown[]; } }
+
+// ── AdBanner component ─────────────────────────────────────────────────────────
+function AdBanner() {
+  useEffect(() => {
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
+  }, []);
+  return (
+    <ins
+      className="adsbygoogle"
+      style={{ display: "block", width: "100%", minHeight: 60 }}
+      data-ad-client="ca-pub-6816753251540275"
+      data-ad-slot="YOUR_AD_SLOT_ID"   // ← Replace with your actual Ad Slot ID from AdSense
+      data-ad-format="horizontal"
+      data-full-width-responsive="true"
+    />
+  );
+}
+
 // ── SmartQuestionDisplay ──────────────────────────────────────────────────────
 const isPipeTable = (t: string) => t.includes(" | ") && /[A-D]\.\s/.test(t);
 
@@ -148,7 +168,7 @@ export default function MockTestScreen({ exam, API_URL, userId }: Props) {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: `1px solid #E0E0E0`, flexShrink: 0 }}>
         <div style={{ fontWeight: 700, fontSize: "0.98rem", display: "flex", alignItems: "center", gap: 8 }}><span>📝</span>Mock Test</div>
         <div style={{ fontSize: "0.7rem", color: G.muted }}>{exam}{selState ? ` · ${selState.split(" ")[0]}` : ""}</div>
-        <button onClick={loadHistory} style={{ background: "transparent", border: "none", color: G.muted, cursor: "pointer", fontSize: "0.75rem", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>📊 History</button>
+        <button onClick={loadHistory} style={{ background: "transparent", border: "none", color: G.gold, cursor: "pointer", fontSize: "0.75rem", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>📊 History</button>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "18px 16px" }}>
@@ -160,6 +180,11 @@ export default function MockTestScreen({ exam, API_URL, userId }: Props) {
               <div style={{ fontSize: 44, marginBottom: 8 }}>📝</div>
               <div style={{ fontSize: "1.2rem", fontWeight: 700, color: G.text }}>Start Mock Test</div>
               <div style={{ fontSize: "0.8rem", color: G.muted, marginTop: 4 }}>AI-generated questions in authentic exam style</div>
+            </div>
+
+            {/* ── AdSense on setup screen ── */}
+            <div style={{ borderRadius: 10, overflow: "hidden" }}>
+              <AdBanner />
             </div>
 
             {exam === "State PCS" && (
@@ -258,6 +283,13 @@ export default function MockTestScreen({ exam, API_URL, userId }: Props) {
               </div>
             )}
 
+            {/* ── AdSense after explanation, before next button ── */}
+            {showExp && (
+              <div style={{ borderRadius: 10, overflow: "hidden" }}>
+                <AdBanner />
+              </div>
+            )}
+
             {selected !== null && (
               <button onClick={nextQ} style={{ ...btn, width: "100%", background: `linear-gradient(135deg,${G.gold},${G.saffron})`, color: "white", boxShadow: `0 6px 20px ${G.glow}` }}>
                 {current + 1 >= questions.length ? "See Results 🏁" : "Next Question →"}
@@ -280,6 +312,12 @@ export default function MockTestScreen({ exam, API_URL, userId }: Props) {
                 <div key={String(l)}><div style={{ fontSize: "1.3rem", fontWeight: 700, color: String(c) }}>{v}</div><div style={{ fontSize: "0.7rem", color: G.muted }}>{l}</div></div>
               ))}
             </div>
+
+            {/* ── AdSense on results screen ── */}
+            <div style={{ borderRadius: 10, overflow: "hidden" }}>
+              <AdBanner />
+            </div>
+
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => { setScreen("setup"); setTopic(""); }} style={{ ...btn, flex: 1, background: "#FFFFFF", border: `1px solid #E0E0E0`, color: G.text }}>New Test</button>
               <button onClick={() => { setScreen("playing"); setCurrent(0); setSelected(null); setAnswers([]); setShowExp(false); setStartTime(Date.now()); }} style={{ ...btn, flex: 1, background: `linear-gradient(135deg,${G.gold},${G.saffron})`, color: "white" }}>Retry 🔁</button>

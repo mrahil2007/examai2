@@ -5,6 +5,26 @@ import type { Components } from "react-markdown";
 import Link from "next/link";
 import { G } from "@/lib/theme";
 
+// ── AdSense global declaration ─────────────────────────────────────────────────
+declare global { interface Window { adsbygoogle: unknown[]; } }
+
+// ── AdBanner component ─────────────────────────────────────────────────────────
+function AdBanner() {
+  useEffect(() => {
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
+  }, []);
+  return (
+    <ins
+      className="adsbygoogle"
+      style={{ display: "block", width: "100%", minHeight: 60 }}
+      data-ad-client="ca-pub-6816753251540275"
+      data-ad-slot="YOUR_AD_SLOT_ID"   // ← Replace with your actual Ad Slot ID from AdSense
+      data-ad-format="horizontal"
+      data-full-width-responsive="true"
+    />
+  );
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function typeText(text: string, setMessages: React.Dispatch<React.SetStateAction<Message[]>>, onDone?: () => void) {
   if (!text || typeof text !== "string") { onDone?.(); return; }
@@ -532,7 +552,11 @@ export default function AskAIScreen({ exam, API_URL, userId, anonId, initialProm
                 <div style={{ fontSize: "1.15rem", fontWeight: 700, color: "#0f172a", marginBottom: 4 }}>What can I help with?</div>
                 <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>Ask any {exam} question</div>
               </div>
-              
+
+              {/* ── AdSense banner shown on empty/welcome state ── */}
+              <div style={{ width: "100%", maxWidth: 480 }}>
+                <AdBanner />
+              </div>
             </div>
           ) : (
             <div style={{ padding: "12px 0 4px", display: "flex", flexDirection: "column", gap: 2 }}>
@@ -580,6 +604,11 @@ export default function AskAIScreen({ exam, API_URL, userId, anonId, initialProm
           </button>
         )}
         <style>{`@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}`}</style>
+
+        {/* ── AdSense banner above input bar ── */}
+        <div style={{ flexShrink: 0, background: "#ffffff", borderTop: "1px solid #e2e8f0", padding: "6px 12px 0" }}>
+          <AdBanner />
+        </div>
 
         {/* Input */}
         <div style={{ flexShrink: 0, padding: "10px 12px calc(12px + env(safe-area-inset-bottom, 0px))", background: "#ffffff", borderTop: isEmpty ? "none" : "1px solid #e2e8f0" }}>

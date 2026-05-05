@@ -1,6 +1,26 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 
+// ── AdSense global declaration ─────────────────────────────────────────────────
+declare global { interface Window { adsbygoogle: unknown[]; } }
+
+// ── AdBanner component ─────────────────────────────────────────────────────────
+function AdBanner() {
+  useEffect(() => {
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch {}
+  }, []);
+  return (
+    <ins
+      className="adsbygoogle"
+      style={{ display: "block", width: "100%", minHeight: 60 }}
+      data-ad-client="ca-pub-6816753251540275"
+      data-ad-slot="YOUR_AD_SLOT_ID"   // ← Replace with your actual Ad Slot ID from AdSense
+      data-ad-format="horizontal"
+      data-full-width-responsive="true"
+    />
+  );
+}
+
 const CAT_CONFIG: Record<string, { icon: string; color: string }> = {
   National:        { icon: "🇮🇳", color: "#f97316" },
   International:   { icon: "🌍", color: "#3b82f6" },
@@ -194,6 +214,11 @@ export default function CurrentAffairsScreen({ exam, API_URL }: Props) {
         </div>
       </div>
 
+      {/* ── AdSense banner below header ── */}
+      <div style={{ flexShrink: 0, background: "#FFFFFF", borderBottom: "1px solid #E0E0E0", padding: "6px 16px" }}>
+        <AdBanner />
+      </div>
+
       {/* Main */}
       {loading ? (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
@@ -245,15 +270,22 @@ export default function CurrentAffairsScreen({ exam, API_URL }: Props) {
         </div>
       )}
 
-      {/* Bottom counter */}
+      {/* Bottom counter + Ad */}
       {!loading && !error && filtered.length > 0 && (
-      <div style={{ padding: "8px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, borderTop: "1px solid #E0E0E0", background: "#FFFFFF", flexShrink: 0 }}>
-          <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{current + 1} / {filtered.length}</span>
-        <div style={{ flex: 1, maxWidth: 180, height: 2, background: "#E0E0E0", borderRadius: 1, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${((current + 1) / filtered.length) * 100}%`, background: "linear-gradient(90deg, #4d8c7a, #3a7a6a)", borderRadius: 1, transition: "width 0.3s ease" }} />
+        <>
+          {/* ── AdSense banner above bottom counter ── */}
+          <div style={{ flexShrink: 0, background: "#FFFFFF", borderTop: "1px solid #E0E0E0", padding: "6px 16px 0" }}>
+            <AdBanner />
           </div>
-          <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{filtered.length} stories</span>
-        </div>
+
+          <div style={{ padding: "8px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, borderTop: "1px solid #E0E0E0", background: "#FFFFFF", flexShrink: 0 }}>
+            <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{current + 1} / {filtered.length}</span>
+            <div style={{ flex: 1, maxWidth: 180, height: 2, background: "#E0E0E0", borderRadius: 1, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${((current + 1) / filtered.length) * 100}%`, background: "linear-gradient(90deg, #4d8c7a, #3a7a6a)", borderRadius: 1, transition: "width 0.3s ease" }} />
+            </div>
+            <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{filtered.length} stories</span>
+          </div>
+        </>
       )}
     </div>
   );
