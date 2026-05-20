@@ -3,7 +3,7 @@ import LandingClient from "./components/LandingClient";
 
 export const metadata: Metadata = {
   title: "ExamAI – AI Tutor for UPSC, JEE, NEET, SSC in India",
-  description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts for UPSC, JEE, NEET, SSC and more.",
+  description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and revise with AI flashcards for UPSC, JEE, NEET, SSC and more.",
   openGraph: {
     title: "ExamAI – AI Tutor for Every Competitive Exam",
     description: "UPSC, JEE, NEET, SSC, Banking — AI-powered exam prep",
@@ -34,7 +34,7 @@ export default function Page() {
           </h1>
           <p style={{ fontSize: 18, color: "#475569", lineHeight: 1.7, maxWidth: 560, marginBottom: 32 }}>
             Ask AI tutors, take PYQ mock tests, read daily current affairs,
-            and get live job alerts for UPSC, JEE, NEET, SSC, Banking and more.
+            and revise with AI flashcards for UPSC, JEE, NEET, SSC, Banking and more.
             India&apos;s most complete exam prep platform.
           </p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 60 }}>
@@ -49,7 +49,7 @@ export default function Page() {
               { icon: "🤖", title: "AI Tutor", desc: "Ask any exam question and get instant explanations" },
               { icon: "📝", title: "Mock Tests", desc: "Practice PYQs for UPSC, JEE, NEET, SSC and more" },
               { icon: "📰", title: "Current Affairs", desc: "Daily AI-curated news with exam relevance tags" },
-              { icon: "💼", title: "Job Alerts", desc: "Real-time government job notifications" },
+              { icon: "🗂️", title: "Flashcards", desc: "AI-generated revision decks for spaced repetition" },
             ].map(f => (
               <div key={f.title} style={{ background: "#FFFFFF", border: "1px solid #E0E0E0", borderRadius: 16, padding: 24, boxShadow: "0 8px 32px #E0E0E0" }}>
                 <div style={{ fontSize: 28, marginBottom: 10 }}>{f.icon}</div>

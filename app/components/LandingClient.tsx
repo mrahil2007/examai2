@@ -12,13 +12,12 @@ import { getFirebaseAuth, getMissingFirebaseEnvVars } from "@/lib/firebase";
 import { useUser } from "@/context/UserContext";
 
 // ─── LAZY IMPORTS (mobile screens) ───────────────────────────────────────────
-const ResumeScreen         = dynamic(() => import("./ResumeScreen"),         { ssr: false });
+const FlashcardsScreen     = dynamic(() => import("./FlashcardsScreen"),     { ssr: false });
 const MockTestScreen       = dynamic(() => import("./MockTestScreen"),       { ssr: false });
 const AskAIScreen          = dynamic(() => import("./AskAIScreen"),          { ssr: false });
 const CurrentAffairsScreen = dynamic(() => import("./CurrentAffairsScreen"), { ssr: false });
-const JobsScreen           = dynamic(() => import("./JobsScreen"),           { ssr: false });
+const ProfileScreen        = dynamic(() => import("./ProfileScreen"),        { ssr: false });
 const SplashScreen         = dynamic(() => import("./SplashScreen"),         { ssr: false });
-const ExamSelectScreen     = dynamic(() => import("./ExamSelectScreen"),     { ssr: false });
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5050";
@@ -30,8 +29,7 @@ const CA_CATEGORIES = ["All","National","International","Economy","Science & Tec
 interface UserLocal { uid: string; name: string; email: string; exam: string; }
 interface Msg  { role: "user" | "ai"; text: string; }
 interface CAItem { id: string; category: string; headline: string; summary: string; content?: string; importance: string; examRelevance: string; }
-interface Job  { _id: string; title: string; category?: string; organization?: string; source?: string; applyLink?: string; link?: string; isNew?: boolean; }
-type MobileTab = "home" | "news" | "quiz" | "jobs" | "resume" | "ai";
+type MobileTab = "home" | "news" | "quiz" | "flashcards" | "profile" | "ai";
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 const css = `
@@ -145,48 +143,6 @@ const css = `
   }
   .profile-trigger.compact .profile-ring { width: 28px; height: 28px; }
   .profile-trigger-name { font-size: 13px; font-weight: 700; max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .profile-overlay {
-    position: fixed; inset: 0; z-index: 998; display: flex; align-items: center;
-    justify-content: center; padding: 20px; background: rgba(15,23,42,0.55);
-    backdrop-filter: blur(8px);
-  }
-  @media (max-width: 768px) { .profile-overlay { align-items: flex-end; padding: 0; } }
-  .profile-panel {
-    width: 100%; max-width: 430px; background: var(--card); border: 1px solid var(--border-t);
-    border-radius: 28px; box-shadow: 0 24px 70px rgba(15,23,42,0.22);
-    padding: 28px; position: relative;
-  }
-  @media (max-width: 768px) { .profile-panel { border-radius: 26px 26px 0 0; padding: 26px 22px calc(28px + env(safe-area-inset-bottom,0px)); border-bottom: none; } }
-  .profile-close {
-    position: absolute; top: 14px; right: 16px; width: 34px; height: 34px; border: none;
-    border-radius: 50%; background: var(--navy2); color: var(--text3); cursor: pointer;
-    display: flex; align-items: center; justify-content: center; font-size: 18px;
-  }
-  .profile-close:hover { color: var(--text); background: #f1eee5; }
-  .profile-hero { text-align: center; padding: 8px 8px 20px; }
-  .profile-avatar {
-    width: 76px; height: 76px; margin: 0 auto 14px; border-radius: 24px;
-    background: radial-gradient(circle at 30% 20%, #fff 0 6%, transparent 7%), linear-gradient(135deg, var(--teal), var(--teal-l));
-    color: #fff; display: flex; align-items: center; justify-content: center;
-    font-size: 24px; font-weight: 900; letter-spacing: .02em; box-shadow: 0 16px 34px rgba(0,103,79,0.24);
-  }
-  .profile-name { font-family: var(--font-h); font-size: 24px; line-height: 1.1; font-weight: 800; color: var(--text); margin-bottom: 8px; }
-  .profile-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--teal-dim); color: var(--teal); font-size: 12px; font-weight: 800; }
-  .profile-detail-list { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 20px; }
-  .profile-detail-row {
-    display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: center;
-    padding: 13px; border: 1px solid var(--border); border-radius: 16px; background: var(--navy);
-  }
-  .profile-detail-icon {
-    width: 38px; height: 38px; border-radius: 13px; display: flex; align-items: center;
-    justify-content: center; background: #fff; color: var(--teal); border: 1px solid var(--border);
-  }
-  .profile-detail-label { color: var(--text3); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 3px; }
-  .profile-detail-value { color: var(--text); font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
-  .profile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .profile-actions .btn-teal, .profile-actions .btn-ghost { width: 100%; padding: 12px 14px; }
-  .profile-note { margin-top: 14px; color: var(--text3); font-size: 11px; line-height: 1.6; text-align: center; }
 
   .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding: 80px 60px 60px; max-width: 1280px; margin: 0 auto; }
   @media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding: 40px 24px 40px; } }
@@ -337,41 +293,6 @@ const css = `
   .resend-btn { background: none; border: none; color: var(--teal); font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0; }
   .resend-btn:disabled { color: var(--text3); cursor: not-allowed; text-decoration: none; }
 
-  /* ── JOBS (desktop) ── */
-  .jobs-wrap { padding: 80px 60px; max-width: 1280px; margin: 0 auto; }
-  @media (max-width: 768px) { .jobs-wrap { padding: 24px 20px; } }
-  .jobs-search-wrap { position: relative; margin-bottom: 16px; }
-  .jobs-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; pointer-events: none; }
-  .jobs-search { width: 100%; padding: 12px 18px 12px 42px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 14px; outline: none; transition: border .2s; }
-  .jobs-search:focus { border-color: var(--border-t); }
-  .jobs-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-  @media (max-width: 768px) { .jobs-filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; } .jobs-filters::-webkit-scrollbar { display: none; } }
-  .jobs-filter { padding: 7px 16px; border-radius: 999px; border: 1px solid var(--border); background: none; color: var(--text3); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; flex-shrink: 0; }
-  .jobs-filter.active { border-color: var(--teal); color: var(--teal); background: var(--teal-dim); }
-  .job-list { display: flex; flex-direction: column; gap: 10px; }
-  .job-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); transition: all .2s; }
-  @media (max-width: 768px) { .job-card { flex-direction: column; align-items: flex-start; gap: 12px; padding: 14px 16px; } }
-  .job-card:hover { border-color: var(--border-t); background: var(--card2); }
-  .job-left { flex: 1; min-width: 0; }
-  .job-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  @media (max-width: 768px) { .job-title { white-space: normal; } }
-  .job-org { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
-  .job-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-  .job-tag { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: var(--teal-dim); color: var(--teal); letter-spacing: .06em; text-transform: uppercase; }
-  .job-tag.govt { background: rgba(59,130,246,0.12); color: #60a5fa; }
-  .job-tag.pvt { background: rgba(168,85,247,0.12); color: #c084fc; }
-  .job-tag.new-tag { background: rgba(34,197,94,0.12); color: #4ade80; }
-  .job-actions { display: flex; gap: 8px; flex-shrink: 0; }
-  @media (max-width: 768px) { .job-actions { width: 100%; } }
-  .btn-askai { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border-t); background: var(--teal-dim); color: var(--teal); font-size: 12px; font-weight: 700; cursor: pointer; transition: all .2s; white-space: nowrap; }
-  .btn-askai:hover { background: var(--teal); color: #fff; }
-  .btn-apply { padding: 8px 14px; border-radius: 10px; border: none; background: var(--teal); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .2s; white-space: nowrap; text-decoration: none; display: inline-block; }
-  .btn-apply:hover { background: var(--teal-l); transform: translateY(-1px); }
-  @media (max-width: 768px) { .btn-askai, .btn-apply { flex: 1; text-align: center; } }
-  .jobs-count { font-size: 12px; color: var(--text3); margin-bottom: 16px; }
-  .jobs-load-more { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: none; color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 16px; transition: all .2s; }
-  .jobs-load-more:hover { border-color: var(--teal); color: var(--teal); }
-
   .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 20px; margin-top: 48px; }
   @media (max-width: 768px) { .testi-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 24px; } }
   .testi-card { padding: 24px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); }
@@ -435,13 +356,6 @@ function getInitials(user: UserLocal | null) {
   const initials = words.length > 1 ? `${words[0][0]}${words[1][0]}` : source.slice(0, 2);
   return initials.toUpperCase();
 }
-function getContactLabel(contact: string) {
-  if (!contact) return "Contact";
-  return contact.startsWith("+") ? "Phone" : "Email";
-}
-function safeValue(value?: string) {
-  return value?.trim() || "Not added";
-}
 
 // ─── MARKDOWN (desktop hero chat only) ───────────────────────────────────────
 function inlineFormat(text: string): React.ReactNode {
@@ -495,83 +409,6 @@ function ProfileIconButton({ user, onClick, compact = false }: { user: UserLocal
       <span className="profile-ring">{getInitials(user)}</span>
       {!compact && <span className="profile-trigger-name">{user.name?.split(" ")[0] || "Profile"}</span>}
     </button>
-  );
-}
-
-function ProfileDetailIcon({ type }: { type: "name" | "contact" | "exam" }) {
-  if (type === "name") {
-    return (
-      <svg width="18" height="18" viewBox="0 0 24 24" {...S}>
-        <path d="M20 21a8 8 0 0 0-16 0" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    );
-  }
-  if (type === "contact") {
-    return (
-      <svg width="18" height="18" viewBox="0 0 24 24" {...S}>
-        <rect x="3" y="5" width="18" height="14" rx="2" />
-        <path d="m3 7 9 6 9-6" />
-      </svg>
-    );
-  }
-  if (type === "exam") {
-    return (
-      <svg width="18" height="18" viewBox="0 0 24 24" {...S}>
-        <path d="M22 10 12 5 2 10l10 5 10-5Z" />
-        <path d="M6 12v5c3 2 9 2 12 0v-5" />
-      </svg>
-    );
-  }
-  return null;
-}
-
-function ProfilePanel({
-  user,
-  currentExam,
-  onClose,
-  onLogout,
-  onChangeExam,
-}: {
-  user: UserLocal;
-  currentExam: string;
-  onClose: () => void;
-  onLogout: () => void;
-  onChangeExam: () => void;
-}) {
-  const detailRows: { label: string; value: string; icon: "name" | "contact" | "exam" }[] = [
-    { label: "Full name", value: safeValue(user.name), icon: "name" },
-    { label: getContactLabel(user.email), value: safeValue(user.email), icon: "contact" },
-    { label: "Target exam", value: safeValue(currentExam || user.exam), icon: "exam" },
-  ];
-
-  return (
-    <div className="profile-overlay" onClick={onClose}>
-      <aside className="profile-panel" role="dialog" aria-modal="true" aria-label="Profile information" onClick={e => e.stopPropagation()}>
-        <button className="profile-close" onClick={onClose} aria-label="Close profile">×</button>
-        <div className="profile-hero">
-          <div className="profile-avatar">{getInitials(user)}</div>
-          <div className="profile-name">{safeValue(user.name)}</div>
-          <div className="profile-pill">{safeValue(currentExam || user.exam)} Aspirant</div>
-        </div>
-        <div className="profile-detail-list">
-          {detailRows.map(row => (
-            <div className="profile-detail-row" key={row.label}>
-              <div className="profile-detail-icon"><ProfileDetailIcon type={row.icon} /></div>
-              <div>
-                <div className="profile-detail-label">{row.label}</div>
-                <div className="profile-detail-value">{row.value}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="profile-actions">
-          <button className="btn-teal" onClick={onChangeExam}>Change Exam</button>
-          <button className="btn-ghost" onClick={onLogout}>Sign Out</button>
-        </div>
-        <p className="profile-note">Password and OTP details are never shown here for privacy.</p>
-      </aside>
-    </div>
   );
 }
 
@@ -937,60 +774,6 @@ function DesktopCurrentAffairs({ onAskAI }: { onAskAI: (q: string) => void }) {
   );
 }
 
-// ─── DESKTOP JOBS ─────────────────────────────────────────────────────────────
-function DesktopJobs({ onAskAI }: { onAskAI: (q: string) => void }) {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
-  const [page, setPage] = useState(1);
-  const PER_PAGE = 20;
-
-  useEffect(() => { fetch(`${API}/jobs`).then(r=>r.json()).then(d=>{ setJobs(Array.isArray(d)?d:d.jobs||[]); setLoading(false); }).catch(()=>setLoading(false)); }, []);
-
-  const filtered = jobs.filter(j => {
-    const matchSearch = !search || j.title?.toLowerCase().includes(search.toLowerCase()) || j.organization?.toLowerCase().includes(search.toLowerCase());
-    if (filter==="All") return matchSearch;
-    const cat = (j.category||"").toLowerCase();
-    return matchSearch && ((filter==="Govt"&&cat==="government")||(filter==="Pvt"&&cat==="private")||(filter==="Remote"&&cat==="remote")||(filter==="International"&&cat==="international"));
-  });
-  const displayed = filtered.slice(0, page*PER_PAGE);
-  const getTagClass = (job: Job) => { const cat=(job.category||"").toLowerCase(); if(cat==="government") return "job-tag govt"; if(cat==="private") return "job-tag pvt"; return "job-tag"; };
-
-  return (
-    <div className="jobs-wrap" id="jobs">
-      <div className="section-label">// Job Alerts</div>
-      <h2>Latest <span>Job Openings</span></h2>
-      <p className="sub" style={{marginBottom:32}}>Real-time government and private job notifications</p>
-      <div className="jobs-search-wrap"><span className="jobs-search-icon">🔍</span><input className="jobs-search" placeholder="Search jobs or organization…" value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} /></div>
-      <div className="jobs-filters">{["All","Govt","Pvt","Remote","International"].map(f=><button key={f} className={`jobs-filter ${filter===f?"active":""}`} onClick={()=>{setFilter(f);setPage(1);}}>{f==="Govt"?"🏛️ Govt":f==="Pvt"?"🏢 Private":f==="Remote"?"🌐 Remote":f==="International"?"✈️ International":"All Jobs"}</button>)}</div>
-      <div className="jobs-count">{filtered.length} jobs found</div>
-      <div className="job-list">
-        {loading && [1,2,3,4,5].map(i=><div key={i} className="skeleton" style={{height:72}}/>)}
-        {!loading && displayed.map(job=>(
-          <div key={job._id} className="job-card">
-            <div className="job-left">
-              <div className="job-title">{job.title}</div>
-              {job.organization && <div className="job-org">{job.organization}</div>}
-              <div className="job-tags">
-                {job.isNew && <span className="job-tag new-tag">NEW</span>}
-                {job.category && <span className={getTagClass(job)}>{job.category.toUpperCase()}</span>}
-                {job.source && <span className="job-tag" style={{background:"rgba(255,255,255,0.05)",color:"var(--text3)"}}>{job.source}</span>}
-              </div>
-            </div>
-            <div className="job-actions">
-              <button className="btn-askai" onClick={()=>{ onAskAI(`Tell me about eligibility, salary, and how to prepare for this job: "${job.title}"${job.organization?` at ${job.organization}`:""}`); document.getElementById("chat")?.scrollIntoView({behavior:"smooth"}); }}>🤖 Ask AI</button>
-              <a href={job.applyLink||job.link||"#"} target="_blank" rel="noopener noreferrer" className="btn-apply">Apply →</a>
-            </div>
-          </div>
-        ))}
-        {!loading && filtered.length===0 && <div style={{textAlign:"center",padding:40,color:"var(--text3)"}}>No jobs found for your search.</div>}
-      </div>
-      {displayed.length < filtered.length && <button className="jobs-load-more" onClick={()=>setPage(p=>p+1)}>Load more ({filtered.length - displayed.length} remaining)</button>}
-    </div>
-  );
-}
-
 // ─── MOBILE AUTH GATE ─────────────────────────────────────────────────────────
 function MobileAuthGate({ onOpenAuth, feature }: { onOpenAuth: () => void; feature: string }) {
   return (
@@ -1016,7 +799,7 @@ const features = [
   { icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/></svg>, title: "Ask AI Tutor", desc: "Ask anything about your exam — get detailed explanations, mnemonics, and PYQ-style answers instantly." },
   { icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12l3 3 5-5"/></svg>, title: "Mock Tests", desc: "Practice with actual PYQs from UPSC, JEE, NEET, SSC and more. Track your accuracy and weak areas." },
   { icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>, title: "Current Affairs", desc: "AI-curated daily news with exam relevance tags for focused revision." },
-  { icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="2" y1="13" x2="22" y2="13"/><circle cx="12" cy="13" r="1.5" fill="currentColor" stroke="none"/></svg>, title: "Job Alerts", desc: "Real-time government job notifications updated every 6 hours — never miss a notification." },
+  { icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M20 21a8 8 0 0 0-16 0" /><circle cx="12" cy="7" r="4" /></svg>, title: "Profile Hub", desc: "Track your coins, streak, leaderboard rank, and notification settings from one place." },
   { icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 4v16M2 12h20M7 8h2M7 16h2M15 8h2M15 16h2"/></svg>, title: "Flashcards", desc: "AI-generated spaced repetition flashcards. Master any topic in record time." },
   { icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg>, title: "Study Planner", desc: "Personalised study schedules that adapt to your progress and exam date." },
 ];
@@ -1040,8 +823,8 @@ const tabs: { id: MobileTab; label: string; icon: React.ReactNode }[] = [
   { id: "news", label: "News", icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M7 8h10M7 12h10M7 16h6"/></svg> },
   { id: "quiz", label: "Quiz", icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12l3 3 5-5"/></svg> },
   { id: "ai", label: "Ask AI", icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/></svg> },
-  { id: "jobs", label: "Jobs", icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="2" y1="13" x2="22" y2="13"/><circle cx="12" cy="13" r="1.5" fill="currentColor" stroke="none"/></svg> },
-  { id: "resume", label: "Resume", icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg> },
+  { id: "flashcards", label: "Cards", icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="3" y="5" width="14" height="12" rx="2" /><path d="M7 9h6M7 13h4" /><path d="M9 19h10a2 2 0 0 0 2-2V9" /></svg> },
+  { id: "profile", label: "Profile", icon: <svg width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M20 21a8 8 0 0 0-16 0" /><circle cx="12" cy="7" r="4" /></svg> },
 ];
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
@@ -1055,12 +838,10 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
 
   // ── Local state ──
   const [showAuth, setShowAuth] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-  const [jobPrefill, setJobPrefill] = useState("");
+  const [aiPrefill, setAiPrefill] = useState("");
   const [mobileTab, setMobileTab] = useState<MobileTab>("home");
   const [viewMode, setViewMode] = useState<"landing" | "webapp">(forceWebApp ? "webapp" : "landing");
   const [showSplash, setShowSplash] = useState(forceWebApp);
-  const [showExamSelect, setShowExamSelect] = useState(false);
   const [exam, setExam] = useState("UPSC");
 
   // Cast for local usage (UserContext user compatible)
@@ -1079,16 +860,22 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
     if (!saved) setExam(user.exam);
   }, [user?.exam]);
 
+  const saveExamPreference = useCallback((nextExam: string, nextUser: UserLocal | null = user) => {
+    setExam(nextExam);
+    if (typeof window !== "undefined") localStorage.setItem("examai_exam", nextExam);
+    if (nextUser) {
+      setCtxUser({ ...nextUser, exam: nextExam } as unknown as typeof ctxUser);
+    }
+  }, [ctxUser, setCtxUser, user]);
+
   const logout = () => {
-    setShowProfile(false);
+    setMobileTab("news");
     ctxLogout();
   };
 
   const handleLogin = (u: UserLocal) => {
     setCtxUser(u as unknown as typeof ctxUser);
-    const nextExam = u.exam || "UPSC";
-    setExam(nextExam);
-    if (typeof window !== "undefined") localStorage.setItem("examai_exam", nextExam);
+    saveExamPreference(u.exam || "UPSC", u);
     setShowAuth(false);
   };
 
@@ -1104,22 +891,11 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
     setViewMode("landing");
     setMobileTab("home");
     setShowSplash(false);
-    setShowExamSelect(false);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSplashDone = () => {
     setShowSplash(false);
-    setShowExamSelect(true);
-  };
-
-  const handleExamSelected = (nextExam: string) => {
-    setExam(nextExam);
-    if (user) setCtxUser({ ...user, exam: nextExam } as unknown as typeof ctxUser);
-    setShowExamSelect(false);
-    setViewMode("webapp");
-    setMobileTab("news");
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const openProfile = () => {
@@ -1127,12 +903,10 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
       setShowAuth(true);
       return;
     }
-    setShowProfile(true);
-  };
-
-  const changeExamFromProfile = () => {
-    setShowProfile(false);
-    setShowExamSelect(true);
+    setShowSplash(false);
+    setViewMode("webapp");
+    setMobileTab("profile");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const goToChat = () => { if (window.innerWidth <= 768) setMobileTab("ai"); else document.getElementById("chat")?.scrollIntoView({behavior:"smooth"}); };
@@ -1156,7 +930,6 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
       <h1 className="seo-h">ExamAI — AI Tutor for UPSC, JEE, NEET, SSC, Banking Exams in India</h1>
 
       {showSplash && <SplashScreen onDone={handleSplashDone} />}
-      {showExamSelect && <ExamSelectScreen onSelect={handleExamSelected} currentExam={exam} />}
 
       {/* ── DESKTOP NAV (landing only) ── */}
       {viewMode === "landing" && (
@@ -1166,7 +939,6 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
             <a href="#features">Features</a>
             <a href="#quiz" onClick={e=>{ e.preventDefault(); goToQuiz(); }}>Mock Test</a>
             <a href="#ca">Current Affairs</a>
-            <a href="#jobs">Jobs</a>
             <a href="#exams">Exams</a>
             <a href="#chat">Ask AI</a>
           </div>
@@ -1212,7 +984,7 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
             <div>
               <div className="hero-badge">🎯 Trusted by 50,000+ students</div>
               <h1>Don&apos;t Just Study<br/><span>Let AI Build Your Career</span></h1>
-              <p>Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts — all in one platform built for serious aspirants.</p>
+              <p>Ask AI tutors, take PYQ mock tests, read daily current affairs, and revise faster with flashcards built for serious aspirants.</p>
               <div className="hero-btns">
                 <a className="btn-teal" href="https://go.examai-in.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>Download App ↗</a>
                 <button className="btn-ghost" onClick={openWebApp}>Go To Web App</button>
@@ -1236,7 +1008,7 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
                   <span style={{fontSize:12,color:"var(--text3)"}}>🔒 examai-in.com/chat</span>
                 </div>
                 <div style={{padding:16}}>
-                  <HeroChat user={user} anonId={anonId} onNeedAuth={()=>setShowAuth(true)} prefill={jobPrefill} onPrefillConsumed={()=>setJobPrefill("")} />
+                  <HeroChat user={user} anonId={anonId} onNeedAuth={()=>setShowAuth(true)} prefill={aiPrefill} onPrefillConsumed={()=>setAiPrefill("")} />
                 </div>
               </div>
             </div>
@@ -1270,8 +1042,7 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
             </div>
           </section>
 
-          <div className="desktop-only"><DesktopCurrentAffairs onAskAI={(q)=>setJobPrefill(q)} /></div>
-          <div className="desktop-only"><DesktopJobs onAskAI={(q)=>setJobPrefill(q)} /></div>
+          <div className="desktop-only"><DesktopCurrentAffairs onAskAI={(q)=>setAiPrefill(q)} /></div>
 
           <section id="exams" style={{background:"var(--navy2)"}}>
             <div className="section-label">// Exam coverage</div>
@@ -1305,7 +1076,7 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
           <section>
             <div className="cta-box">
               <h2>Ready to crack your exam?</h2>
-              <p>Download the mobile app or continue instantly in the web app with Ask AI, Mock Tests, News, Jobs and Resume tools.</p>
+              <p>Download the mobile app or continue instantly in the web app with Ask AI, Mock Tests, News, Flashcards, and your study profile.</p>
               <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
                 <a className="btn-teal" href="https://go.examai-in.com" target="_blank" rel="noopener noreferrer" style={{fontSize:16,padding:"16px 32px", textDecoration: "none"}}>Download on Play Store ↗</a>
                 <button className="btn-ghost" style={{fontSize:16,padding:"16px 32px"}} onClick={openWebApp}>Open Web App</button>
@@ -1353,27 +1124,35 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
             API_URL={API}
             userId={user?.uid}
             anonId={anonId}
-            initialPrompt={jobPrefill}
-            onPromptUsed={()=>setJobPrefill("")}
+            initialPrompt={aiPrefill}
+            onPromptUsed={()=>setAiPrefill("")}
           />
         </div>
 
-        {/* ══ JOBS TAB (mobile) ══ */}
-        <div className={`mobile-section ${mobileTab==="jobs"?"active":""}`}>
-          <JobsScreen
-            exam={exam}
-            API_URL={API}
-            onAskAI={(q)=>{ setJobPrefill(q); setMobileTab("ai"); }}
-          />
-        </div>
-
-        {/* ══ RESUME TAB (mobile) — auth protected ══ */}
-        <div className={`mobile-section ${mobileTab==="resume"?"active":""}`}
-          style={{ display: mobileTab==="resume" ? "flex" : "none", flexDirection:"column", height:"calc(100vh - 56px - var(--bottom-bar-h))" }}>
+        {/* ══ FLASHCARDS TAB (mobile) — auth protected ══ */}
+        <div className={`mobile-section ${mobileTab==="flashcards"?"active":""}`}
+          style={{ display: mobileTab==="flashcards" ? "flex" : "none", flexDirection:"column", height:"calc(100vh - 56px - var(--bottom-bar-h))" }}>
           {user ? (
-            <ResumeScreen API_URL={API} userId={user.uid} />
+            <FlashcardsScreen API_URL={API} userId={user.uid} exam={exam} />
           ) : (
-            <MobileAuthGate onOpenAuth={()=>setShowAuth(true)} feature="Resume Builder" />
+            <MobileAuthGate onOpenAuth={()=>setShowAuth(true)} feature="Flashcards" />
+          )}
+        </div>
+
+        {/* ══ PROFILE TAB (mobile) — auth protected ══ */}
+        <div className={`mobile-section ${mobileTab==="profile"?"active":""}`}
+          style={{ display: mobileTab==="profile" ? "flex" : "none", flexDirection:"column", height:"calc(100vh - 56px - var(--bottom-bar-h))" }}>
+          {user ? (
+            <ProfileScreen
+              API_URL={API}
+              user={user}
+              exam={exam}
+              exams={EXAMS.filter(x => x !== "General")}
+              onExamChange={(nextExam) => saveExamPreference(nextExam)}
+              onLogout={logout}
+            />
+          ) : (
+            <MobileAuthGate onOpenAuth={()=>setShowAuth(true)} feature="Profile" />
           )}
         </div>
         </>
@@ -1406,15 +1185,6 @@ export default function LandingClient({ forceWebApp = false }: LandingClientProp
 
       {/* ── AUTH MODAL ── */}
       {showAuth && <AuthModal onClose={()=>setShowAuth(false)} onLogin={handleLogin} />}
-      {showProfile && user && (
-        <ProfilePanel
-          user={user}
-          currentExam={exam}
-          onClose={()=>setShowProfile(false)}
-          onLogout={logout}
-          onChangeExam={changeExamFromProfile}
-        />
-      )}
     </div>
   );
 }

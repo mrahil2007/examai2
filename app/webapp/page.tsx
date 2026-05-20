@@ -3,7 +3,7 @@ import LandingClient from "../components/LandingClient";
 
 export const metadata: Metadata = {
   title: "ExamAI Web App",
-  description: "ExamAI web app with Ask AI, Mock Tests, Current Affairs, Jobs, and Resume tools.",
+  description: "ExamAI web app with Ask AI, Mock Tests, Current Affairs, Flashcards, and Profile tools.",
   robots: { index: true, follow: true },
   alternates: { canonical: "https://examai-in.com/webapp" },
 };

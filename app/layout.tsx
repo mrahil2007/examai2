@@ -5,13 +5,13 @@ import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "ExamAI – AI Tutor for Every Competitive Exam in India",
-  description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts for UPSC, JEE, NEET, SSC and more.",
-  keywords: "JEE preparation, NEET study, UPSC AI tutor, SSC exam practice, AI quiz India, job alerts India",
+  description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and revise with AI flashcards for UPSC, JEE, NEET, SSC and more.",
+  keywords: "JEE preparation, NEET study, UPSC AI tutor, SSC exam practice, AI quiz India, flashcards India",
   robots: "index, follow",
   
   openGraph: {
     title: "ExamAI – AI Tutor for Every Competitive Exam in India",
-    description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and get live job alerts for UPSC, JEE, NEET, SSC and more.",
+    description: "Ask AI tutors, take PYQ mock tests, read daily current affairs, and revise with AI flashcards for UPSC, JEE, NEET, SSC and more.",
     url: "https://examai-in.com",
     type: "website",
     images: [{ url: "https://examai-in.com/exam_ai_icon_512.png",

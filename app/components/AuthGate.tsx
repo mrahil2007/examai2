@@ -73,7 +73,7 @@ export default function AuthGate({ children, onOpenAuth }: AuthGateProps) {
           <p style={{
             fontSize: 14, color: "#64748b", lineHeight: 1.7, marginBottom: 28,
           }}>
-            This feature is available for registered users. Create a free account to access mock tests, resume builder and more.
+            This feature is available for registered users. Create a free account to access mock tests, flashcards, and more.
           </p>
           <button
             onClick={onOpenAuth}

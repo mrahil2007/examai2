@@ -57,8 +57,8 @@ export default function PrivacyPolicyPage() {
           <li><b>Personal Data:</b> Name, email, and exam preferences you provide during registration.</li>
           <li><b>Chat and Interaction Data:</b> Prompts, uploaded files, and generated responses used to deliver and personalize the service.</li>
           <li><b>Quiz and Performance Data:</b> Topics attempted, scores, and time taken.</li>
-          <li><b>Resume Data:</b> Information entered into Resume Builder features.</li>
-          <li><b>Device Data:</b> Notification token (FCM token) for alerts like jobs and current affairs.</li>
+          <li><b>Flashcard Data:</b> Topics generated, review progress, and spaced-repetition status.</li>
+          <li><b>Device Data:</b> Notification token (FCM token) for alerts like current affairs and quiz reminders.</li>
           <li><b>Authentication Data:</b> Basic profile info from Google Sign-In (such as name and email).</li>
         </ul>
 
@@ -66,7 +66,7 @@ export default function PrivacyPolicyPage() {
         <ul style={{ paddingLeft: 20, lineHeight: 1.75, color: "#CAD7EA" }}>
           <li>Create and manage your account.</li>
           <li>Personalize your AI tutor experience.</li>
-          <li>Provide chat, quiz, and resume features.</li>
+          <li>Provide chat, quiz, flashcard, and profile features.</li>
           <li>Send relevant notifications.</li>
           <li>Analyze usage trends to improve the product.</li>
         </ul>
